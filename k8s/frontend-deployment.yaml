@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hrms-frontend
+  namespace: hrms
+  labels:
+    app: hrms-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hrms-frontend
+  template:
+    metadata:
+      labels:
+        app: hrms-frontend
+    spec:
+      containers:
+        - name: hrms-frontend
+          image: agneykudekar1125/hrms-frontend:1.0
+          ports:
+            - containerPort: 80
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hrms-frontend
+  namespace: hrms
+spec:
+  type: NodePort
+  selector:
+    app: hrms-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+
+

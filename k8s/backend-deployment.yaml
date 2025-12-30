@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hrms-backend
+  namespace: hrms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hrms-backend
+  template:
+    metadata:
+      labels:
+        app: hrms-backend
+    spec:
+      # Init container to wait until MySQL is ready
+      initContainers:
+      - name: wait-for-mysql
+        image: mysql:8
+        command:
+          - sh
+          - -c
+          - |
+            until nc -z mysql 3306; do
+              echo "Waiting for MySQL...";
+              sleep 2;
+            done;
+      containers:
+      - name: hrms-backend
+        image: agneykudekar1125/hrms-backend
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://mysql:3306/hrmsportal
+        - name: SPRING_DATASOURCE_USERNAME
+          value: root
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: root
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hrms-backend
+  namespace: hrms
+spec:
+  selector:
+    app: hrms-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
+
+
